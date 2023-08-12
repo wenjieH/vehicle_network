@@ -22,6 +22,8 @@ from detect import parse_opt,main
 import io
 import asyncio
 
+from Ours_Run import Run
+
 app = FastAPI()
 
 
@@ -60,6 +62,16 @@ async def receive(
     else:
         return {"code": 0, "msg": "fail"}
 
+
+@app.post("/schedule")
+async def schedule(
+    #
+    vehicles: List[list] = [],
+    num: List[list] = [],
+):
+    print(vehicles, num)
+    sch_result = Run(vehicles, num)
+    return {'code': 200, "sche_result": sch_result}
 
 async def redirect_request(image: UploadFile, routes: List[str], outset: List[str]):
     logger.info(f"Redirecting request to {routes[0]} with {len(routes)} routes left")

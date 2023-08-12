@@ -17,11 +17,14 @@ def CreateVehicleBSsField():
     return [vehicles, BSs]
 
 
-def Run():
+def Run(vehicle_coorset, vehicle_num):
 
     nodes_BS = CreateVehicleBSsField()
+    for i in range(len(vehicle_num)):
+        nodes_BS[0][vehicle_num[i]] = vehicle_coorset[i]
 
 
+    print(nodes_BS)
     # nodes_BS = CreateVehicleBSs(Num)
     vehicles = []
     BSs = []
@@ -533,7 +536,8 @@ def Run():
 
 
 if __name__ == '__main__':
-    print(Run())
+
+    print(Run([[0.5, 0.2]], [0]))
     # RepeatNum = 40
     #
     # for i in range(8):
