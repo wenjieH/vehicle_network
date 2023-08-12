@@ -13,6 +13,7 @@ class BaseStation():
 
 
         self.cal_capacity = 0
+        self.cal_num_capacity = 0
         self.index = 0
 
         if type == 1:
@@ -21,7 +22,9 @@ class BaseStation():
             self.initCal2()
 
     def initCal1(self):
-        self.cal_capacity = random.randint(25, 50) / 3
+        self.cal_capacity = random.randint(50, 100) / 3
+        self.cal_num_capacity = 20
 
     def initCal2(self):
-        self.cal_capacity = random.randint(5, 10) / 3
+        self.cal_capacity = random.randint(10, 20) / 3
+        self.cal_num_capacity = 5

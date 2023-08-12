@@ -6,6 +6,8 @@ class Vehicle():
         self.position_x = pos_x
         self.position_y = pos_y
         self.cal_capacity = 0
+        self.relay_tasknum_capacity = 0
+
         self.s_pow = 0
         self.task = 0
         self.index = 0
@@ -26,12 +28,19 @@ class Vehicle():
         self.layers = []
         self.valuation = 0
         self.offload_decision = -1
+
+
+
         self.initTask()
 
 
 
     def initTask(self):
-        self.task = random.randint(100, 500)
-        self.valuation = random.randint(1500, 1800)
-        self.deadline = random.randint(1000, 1500)
+        self.task = random.randint(300, 600)
+        self.valuation = random.randint(1000, 1500)
+        self.deadline = random.randint(1000, 1200)
         self.cal_capacity = random.uniform(1, 2)/3
+        self.relay_tasknum_capacity = 5
+
+
+# total_valuation: 126503.04771884048

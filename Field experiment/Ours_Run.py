@@ -100,10 +100,11 @@ def Run():
     # for vehicle in vehicles:
     #     print([vehicle.position_x, vehicle.position_y])
 
-    total_BS_cap = 0
+    total_BS_cap = []
     for BS in BSs:
         # print(BS.cal_capacity)
-        total_BS_cap += BS.cal_capacity
+        total_BS_cap.append(BS.cal_capacity)
+
 
     count = 1
     while 1:
@@ -160,6 +161,7 @@ def Run():
             # print('vehicle_estimate', vehicle_estimate)
             vehicle.estimate_delay = min(vehicle_estimate)
 
+            # print('estimate_compare', vehicle.estimate_delay, vehicle.task / vehicle.cal_capacity, vehicle_estimate.index(min(vehicle_estimate)), vehicle.valuation - vehicle.estimate_delay > 0 , vehicle.estimate_delay < vehicle.deadline , vehicle.estimate_delay < vehicle.task/vehicle.cal_capacity)
             if vehicle.valuation - vehicle.estimate_delay > 0 and vehicle.estimate_delay < vehicle.deadline and vehicle.estimate_delay < vehicle.task / vehicle.cal_capacity:
                 # BSs[vehicle_estimate.index(min(vehicle_estimate))].off_vehicles.append(vehicle)
                 vehicle.offload_decision = vehicle_estimate.index(min(vehicle_estimate))
@@ -172,32 +174,80 @@ def Run():
         for vehicle in vehicles:
             if vehicle.offload_decision != -1:
                 off_es_num += 1
-                off_es_set.append(vehicle)
+                off_es_set.append(vehicle.index)
 
+        for vehicle in vehicles:
+            vehicle.offload_decision = -1
 
+        cal_set = []
         for BS in BSs:
-            off_es_num_s = int(off_es_num * BS.cal_capacity / total_BS_cap)
+            cal_set.append(BS.cal_capacity)
+        # print('cal_set:', cal_set)
 
-            for i in range(len(off_es_set)):
-                for j in range(i, len(off_es_set)):
-                    if sum(off_es_set[i].layer_transmit[BS.index]) > sum(off_es_set[j].layer_transmit[BS.index]):
-                        off_es_set[i], off_es_set[j] = off_es_set[j], off_es_set[i]
+        # print('off_es_num', off_es_num)
 
-            for i in range(off_es_num_s):
-                off_es_set[i].offload_decision = BS.index
-                # BS.off_vehicles.append(off_es_set[i])
 
-            off_es_set = off_es_set[off_es_num_s:]
+        for m in range(len(BSs)):
+
+            # print(off_es_num,  sum(total_BS_cap[m:]))
+            off_es_num_s = int(off_es_num * BSs[m].cal_capacity / sum(total_BS_cap[m:]))
+            # print('off_es_num_s', off_es_num_s)
+            if off_es_num_s <= BSs[m].cal_num_capacity:
+                for i in range(len(off_es_set)):
+                    for j in range(i, len(off_es_set)):
+                        if vehicles[off_es_set[i]].valuation - sum(
+                                vehicles[off_es_set[i]].estimate_layer_delay[BSs[m].index]) < vehicles[
+                            off_es_set[j]].valuation - sum(vehicles[off_es_set[j]].estimate_layer_delay[BSs[m].index]):
+                            off_es_set[i], off_es_set[j] = off_es_set[j], off_es_set[i]
+
+                for i in range(off_es_num_s):
+                    vehicles[off_es_set[i]].offload_decision = m
+                    # print(vehicles[off_es_set[i]].offload_decision)
+                    # BS.off_vehicles.append(off_es_set[i])
+
+                off_es_set = off_es_set[off_es_num_s:]
+                off_es_num -= off_es_num_s
+                if off_es_num <= 0:
+                    break
+            else:
+
+                off_es_num_s = BSs[m].cal_num_capacity
+                for i in range(len(off_es_set)):
+                    for j in range(i, len(off_es_set)):
+                        if vehicles[off_es_set[i]].valuation - sum(
+                                vehicles[off_es_set[i]].estimate_layer_delay[BSs[m].index]) < vehicles[
+                            off_es_set[j]].valuation - sum(vehicles[off_es_set[j]].estimate_layer_delay[BSs[m].index]):
+                            off_es_set[i], off_es_set[j] = off_es_set[j], off_es_set[i]
+
+                # print('off_es_num_s2', off_es_num_s)
+                # print('off_es_num_s3', off_es_num_s, len(off_es_set))
+                for i in range(off_es_num_s):
+                    vehicles[off_es_set[i]].offload_decision = m
+                    # print(vehicles[off_es_set[i]].offload_decision)
+                    # BS.off_vehicles.append(off_es_set[i])
+
+                off_es_set = off_es_set[off_es_num_s:]
+                # print('off_es_num_s4', off_es_num_s, len(off_es_set))
+                off_es_num -= off_es_num_s
+                if off_es_num <= 0:
+                    break
+
+        # for BS in BSs:
 
         off_set = []
         for vehicle in vehicles:
             off_set.append(vehicle.offload_decision)
-        # print('off_set:', off_set, len(off_set))
+        # print('off_set', off_set)
 
         for vehicle in vehicles:
             if vehicle.offload_decision != -1:
                 BSs[vehicle.offload_decision].off_vehicles.append(vehicle)
 
+        # for i in range(len(vehicles)):
+        #     if i in [0, 5]:
+        #         vehicles[i].offload_decision = 0
+        #     elif i in [6, 10]:
+        #         vehicles[i].offload_decision = 1
 
         ##   offload execution
         offload_set = []
@@ -290,19 +340,23 @@ def Run():
                 last_result_b = result_b[-1]
                 last_result_b.append(vehicle.offload_decision)
                 result_c.append(last_result_b)
-
-
+                # print('path_layer:', path_layer)
+                # print(result, result_b)
+                #
+                # print(vehicle.layer_transmit_error[vehicle.offload_decision], vehicle.off_path)
                 for i in range(len(vehicle.layer_transmit_error[vehicle.offload_decision])):
                     if i == len(vehicle.layer_transmit_error[vehicle.offload_decision]) - 1:
+                        # print('result get_path_cost', result_c, result_c[i])
                         true_layerdelay = vehicle.task * links.get_path_cost(result_c[i])
                     else:
-
+                        # print('result get_path_cost_no_BS', result_c, result_c[i])
                         true_layerdelay = vehicle.task * links.get_path_cost_no_BS(result_c[i])
                     estimate_layerdelay = vehicle.estimate_layer_delay[vehicle.offload_decision][i]
-                    vehicle.layers_error[vehicle.offload_decision][i] = (true_layerdelay - estimate_layerdelay) / 2
+                    vehicle.layers_error[vehicle.offload_decision][i] = (vehicle.layers_error[vehicle.offload_decision][
+                                                                             i] + true_layerdelay - estimate_layerdelay) / 2
 
                     if len(result_b[i]) > 1:
-
+                        # print(result_b[i])
                         true_transdelay = vehicle.task * links.get_path_cost_no_BS(result_b[i])
                         vehicle.layer_transmit_error[vehicle.offload_decision][i] = true_transdelay
 
@@ -313,7 +367,8 @@ def Run():
 
                 total_cap = 0
                 for BS in BSs:
-
+                    # if (len(BS.off_vehicles) * vehicle.task/BS.cal_capacity - BS.para_num[1] * vehicle.task / BS.cal_capacity)/2 > 0:
+                    # total_off += len(BS.off_vehicles)
                     total_cap += BS.cal_capacity
 
                 for BS in BSs:
@@ -321,25 +376,115 @@ def Run():
                     if BS.para_num[1] == 0:
                         BS.para_num[1] = 1
 
-
-            # print('adapt')
-            # for BS in BSs:
-            #     print(BS.para_num)
-
-        off_num = 0
+        all_compute_error = []
         for vehicle in vehicles:
             if vehicle.offload_decision != -1:
-                off_num += 1
+                # print(BSs[vehicle.offload_decision].off_vehicles, BSs[vehicle.offload_decision].para_num[1], all_compute_error)
+                all_compute_error.append((len(BSs[vehicle.offload_decision].off_vehicles) -
+                                          BSs[vehicle.offload_decision].para_num[1]) * vehicle.task / BSs[
+                                             vehicle.offload_decision].cal_capacity / 2)
+
+        for vehicle in vehicles:
+            for BS in BSs:
+                vehicle.compute_error[BS.index] = (vehicle.compute_error[BS.index] + sum(all_compute_error) / len(
+                    all_compute_error)) / 2
+            # print('compute_error', vehicle.compute_error)
+
+        # update param
+        # if count % 20 == 0:
+        #     for BS in BSs:
+        #         BS.para_num = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        #
+        #         for vehicle in vehicles:
+        #             if vehicle.offload_decision != -1:
+        #                 BS.para_num[int(Distance(vehicle.position_x, BS.position_x, vehicle.position_y,
+        #                              BS.position_y) / CommunicationRange)] += 1
+        #
+        #         for i in range(len(BS.para_num)):
+        #             if BS.para_num[i] > 1:
+        #                 BS.para_num[i] -= 1
+        #
+        #     print('adapt')
+        #     for BS in BSs:
+        #         print(BS.para_num)
+        #
+        # off_num = 0
+        # for vehicle in vehicles:
+        #     if vehicle.offload_decision != -1:
+        #         off_num += 1
         # print('off_num:', off_num)
 
+        # for BS in BSs:
+        #     print(BS.para_num)
 
-        if count > 20:
+        if count > 10:
             # #   look results
-            results = []
-            for vehicle in vehicles:
-                results.append(vehicle.off_path)
 
-            return results
+            for vehicle in vehicles:
+                if vehicle.off_path == []:
+                    vehicle.offload_decision = -1
+
+            paths_element = []
+            for vehicle in vehicles:
+
+                if vehicle.offload_decision != -1:
+                    paths_element.append(vehicle.off_path[:-1])
+
+            for vehicle in vehicles:
+
+                relay_task = []
+                relay_task_valuation = []
+                for item_path in paths_element:
+                    if vehicle.index in item_path:
+                        relay_task.append(item_path)
+                        relay_task_valuation.append(vehicles[item_path[0]].valuation)
+
+                # print('relay_task_valuation:', relay_task, relay_task_valuation)
+                if len(relay_task) > vehicle.relay_tasknum_capacity:
+                    for i in range(len(relay_task)):
+                        for j in range(i, len(relay_task)):
+                            if relay_task_valuation[i] < relay_task_valuation[j]:
+                                relay_task[i], relay_task[j] = relay_task[j], relay_task[i]
+
+                    for item_path in relay_task[vehicle.relay_tasknum_capacity:]:
+                        vehicles[item_path[0]].offload_decision = -1
+
+            for BS in BSs:
+                if len(BS.off_vehicles) > BS.cal_num_capacity:
+                    for i in range(len(BS.off_vehicles)):
+                        for j in range(i, len(BS.off_vehicles)):
+                            if BS.off_vehicles[i].valuation < BS.off_vehicles[j].valuation:
+                                BS.off_vehicles[i], BS.off_vehicles[j] = BS.off_vehicles[j], BS.off_vehicles[i]
+
+                    # print('BS.off_vehicles[BS.cal_num_capacity:]', len(BS.off_vehicles[BS.cal_num_capacity:]))
+                    for vehicle in BS.off_vehicles[BS.cal_num_capacity:]:
+                        vehicle.offload_decision = -1
+
+            total_valuation = 0
+            for vehicle in vehicles:
+                if vehicle.offload_decision != -1:
+                    if vehicle.task * links.get_path_cost(vehicle.off_path) - \
+                            len(BSs[vehicle.offload_decision].off_vehicles) * vehicle.task / BSs[
+                        vehicle.offload_decision].cal_capacity < vehicle.deadline:
+                        total_valuation += vehicle.valuation - vehicle.task * links.get_path_cost(vehicle.off_path) - \
+                                           len(BSs[vehicle.offload_decision].off_vehicles) * vehicle.task / BSs[
+                                               vehicle.offload_decision].cal_capacity
+                    else:
+                        total_valuation += 0
+                else:
+                    if vehicle.task / vehicle.cal_capacity <= vehicle.deadline:
+                        total_valuation += vehicle.valuation - vehicle.task / vehicle.cal_capacity
+                    else:
+                        total_valuation += 0
+
+            print('total_valuation:', total_valuation)
+
+
+            sch_results = []
+            for vehicle in vehicles:
+                sch_results.append([vehicle.off_path, vehicle.offload_decision])
+
+            return sch_results
             # break
 
         count += 1
@@ -373,6 +518,8 @@ def Run():
             vehicle.off_win = 0
             vehicle.off_path = []
             vehicle.true_delay = 0
+
+
 
 
 
