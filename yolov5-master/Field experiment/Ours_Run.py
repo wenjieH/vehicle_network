@@ -10,8 +10,10 @@ from Draw import drawPointPaths
 import copy
 
 
+
+
 def CreateVehicleBSsField():
-    vehicles = [[0.45, 0.2], [0.45, 0.4], [0.9, 0.1], [0.9, 0.2], [0.9, 0.3], [1.35, 1.8], [1.35, 1.9], [1.35, 2], [1.8, 1.6], [1.8, 1.8]]
+    vehicles = [[0.5, 0.2], [0.5, 0.4], [1, 0.2], [1, 0.3], [1.5, 1.8], [1.5, 1.9], [1.5, 2], [2, 1.6], [2, 1.8]]
     BSs = [[0, 1], [2, 1]]
 
     return [vehicles, BSs]

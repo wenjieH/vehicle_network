@@ -4,7 +4,7 @@ import uvicorn
 from typing import List
 from loguru import logger
 from fastapi import FastAPI, BackgroundTasks, UploadFile, File
-
+from pydantic import BaseModel
 import sys
 import os
 
@@ -47,6 +47,7 @@ async def predict(
     background_tasks.add_task(redirect_request, image, routes, outset)
     return {"code": 0, "msg": "success"}
 
+
 @app.post("/receive")
 async def receive(
     # background_tasks: BackgroundTasks,
@@ -63,15 +64,47 @@ async def receive(
         return {"code": 0, "msg": "fail"}
 
 
+class scheduleItem(BaseModel):
+    vehicle: List[float] = []
+    num: int
+
+from Importdatabase import mysql
+DataBase = mysql()
+
 @app.post("/schedule")
 async def schedule(
-    #
-    vehicles: List[list] = [],
-    num: List[list] = [],
+    # data: List[scheduleItem] = [],
 ):
-    print(vehicles, num)
-    sch_result = Run(vehicles, num)
+    field_data = DataBase.FindAllFieldData()
+    print(field_data)
+
+    vehicles = []
+    nums = []
+    for item in field_data:
+        vehicles.append([item['lat'], item['lng']])
+        nums.append(item['num'])
+
+    if not vehicles:
+        return {'code': 200, "sche_result": []}
+    print(vehicles, nums)
+    sch_result = Run(vehicles, nums)
     return {'code': 200, "sche_result": sch_result}
+
+
+
+
+@app.post("/update")
+async def updateLoc(
+    data: List[scheduleItem],
+):
+
+    for item in data:
+        DataBase.UpdateVehicle(item.vehicle[0], item.vehicle[1], item.num)
+
+    return {'code': 200, "sche_result": data}
+
+
+
 
 async def redirect_request(image: UploadFile, routes: List[str], outset: List[str]):
     logger.info(f"Redirecting request to {routes[0]} with {len(routes)} routes left")
