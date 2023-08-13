@@ -64,44 +64,44 @@ async def receive(
         return {"code": 0, "msg": "fail"}
 
 
-class scheduleItem(BaseModel):
-    vehicle: List[float] = []
-    num: int
-
-from Importdatabase import mysql
-DataBase = mysql()
-
-@app.post("/schedule")
-async def schedule(
-    # data: List[scheduleItem] = [],
-):
-    field_data = DataBase.FindAllFieldData()
-    print(field_data)
-
-    vehicles = []
-    nums = []
-    for item in field_data:
-        vehicles.append([item['lat'], item['lng']])
-        nums.append(item['num'])
-
-    if not vehicles:
-        return {'code': 200, "sche_result": []}
-    print(vehicles, nums)
-    sch_result = Run(vehicles, nums)
-    return {'code': 200, "sche_result": sch_result}
-
-
-
-
-@app.post("/update")
-async def updateLoc(
-    data: List[scheduleItem],
-):
-
-    for item in data:
-        DataBase.UpdateVehicle(item.vehicle[0], item.vehicle[1], item.num)
-
-    return {'code': 200, "sche_result": data}
+# class scheduleItem(BaseModel):
+#     vehicle: List[float] = []
+#     num: int
+#
+# from Importdatabase import mysql
+# DataBase = mysql()
+#
+# @app.post("/schedule")
+# async def schedule(
+#     # data: List[scheduleItem] = [],
+# ):
+#     field_data = DataBase.FindAllFieldData()
+#     print(field_data)
+#
+#     vehicles = []
+#     nums = []
+#     for item in field_data:
+#         vehicles.append([item['lat'], item['lng']])
+#         nums.append(item['num'])
+#
+#     if not vehicles:
+#         return {'code': 200, "sche_result": []}
+#     print(vehicles, nums)
+#     sch_result = Run(vehicles, nums)
+#     return {'code': 200, "sche_result": sch_result}
+#
+#
+#
+#
+# @app.post("/update")
+# async def updateLoc(
+#     data: List[scheduleItem],
+# ):
+#
+#     for item in data:
+#         DataBase.UpdateVehicle(item.vehicle[0], item.vehicle[1], item.num)
+#
+#     return {'code': 200, "sche_result": data}
 
 
 
@@ -135,7 +135,7 @@ async def predict(image: UploadFile, routes: List[str], outset: List[str]):
         image_data = await image.read()
         img = Image.open(io.BytesIO(image_data))
         # 先清空pic文件夹下的receive文件夹
-        trans_folder = r"C:\Users\tmc\Documents\GitHub\vehicle_network\yolov5-master\pic\receive"
+        trans_folder = "/Users/wy/Downloads/vehicle_network-main/yolov5-master/pic/receive"
         if os.path.exists(trans_folder):
             file_list = os.listdir(trans_folder)
             for file_name in file_list:
@@ -143,7 +143,7 @@ async def predict(image: UploadFile, routes: List[str], outset: List[str]):
                 os.remove(file_path)
 
         #将img保存在pic文件夹下的recvive文件夹下   保存的文件名为vehicle.png
-        save_folder = r"C:\Users\tmc\Documents\GitHub\vehicle_network\yolov5-master\pic\receive"
+        save_folder = r"C:\Users\tmc\Documents\GitHub\vehicle_network\vehicle_network-main 2\vehicle_network-main\yolov5-master\pic\receive"
         save_filename = "vehicle.png"
         save_path = os.path.join(save_folder, save_filename)
         img.save(save_path)
