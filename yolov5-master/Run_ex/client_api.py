@@ -104,8 +104,6 @@ async def updateLoc(
     return {'code': 200, "sche_result": data}
 
 
-
-
 async def redirect_request(image: UploadFile, routes: List[str], outset: List[str]):
     logger.info(f"Redirecting request to {routes[0]} with {len(routes)} routes left")
     if not routes:

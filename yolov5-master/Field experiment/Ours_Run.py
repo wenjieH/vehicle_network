@@ -14,7 +14,7 @@ import copy
 
 def CreateVehicleBSsField():
     vehicles = [[0.5, 0.2], [0.5, 0.4], [1, 0.2], [1, 0.3], [1.5, 1.8], [1.5, 1.9], [1.5, 2], [2, 1.6], [2, 1.8]]
-    BSs = [[0, 1], [2, 1]]
+    BSs = [[1, 1]]
 
     return [vehicles, BSs]
 
