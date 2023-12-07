@@ -3,6 +3,8 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/yolov5-master" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/yolov5-master/Field experiment" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/Field experiment" />
     </content>
     <orderEntry type="jdk" jdkName="Python 3.10" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />

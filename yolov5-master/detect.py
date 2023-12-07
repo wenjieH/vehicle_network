@@ -35,6 +35,8 @@ import sys
 from pathlib import Path
 
 import torch
+import time
+
 
 FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
@@ -263,8 +265,10 @@ def main(opt):
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     opt = parse_opt()
     result = main(opt)
-    print("result: ", result)
+    end_time = time.time()
+    print("result: ", result, 'time:', end_time - start_time)
 
 #返回一个数据就可以

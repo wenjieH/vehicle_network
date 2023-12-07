@@ -5,8 +5,8 @@ from Ours_Run import Run
 from detect import parse_opt, main
 import json
 
-vehicles_ip = ["192.168.3.95:8080"]
-servers_ip = ["192.168.3.194:8080"]
+vehicles_ip = ["192.168.1.105:8080", "192.168.1.113:8080", "192.168.1.109:8080", "192.168.1.107:8080", "192.168.1.106:8080", "192.168.1.108:8080", "192.168.1.110:8080", "192.168.1.112:8080", "192.168.1.111:8080"]
+servers_ip = ["192.168.1.101:8080"]
 flag = 0
 async def execute():
     image_path = Path.cwd() / r"E:\vehicle_network\vehicle_network\yolov5-master\pic\receive\vehicle.png"
